@@ -45,12 +45,10 @@ install:: install-bin install-man
 install-bin:: vtree
 	install -d ${BINDIR}
 	install -c -m 755 -s vtree ${BINDIR}/vtree
-	touch install-bin
 
 install-man:: vtree.man
 	install -d ${MANDIR}
 	sed 's/MANEXT/${MANEXT}/g' <vtree.man >${MANDIR}/vtree.${MANEXT}
-	touch install-man
 
 uninstall:: uninstall-bin uninstall-man
 
