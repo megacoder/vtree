@@ -24,6 +24,7 @@
 #include <dirent.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <errno.h>
 
 #ifndef	WHATCOL
 #define WHATCOL	32
@@ -160,7 +161,8 @@ static void
 printName(
 	char		*name,
 	mode_t		mode,
-	int		isLastEntry
+	int		isLastEntry,
+	int		justTheName
 )
 {
 	char *		tag;
@@ -190,12 +192,19 @@ printName(
 	} else if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
 		tag = "*";
 	}
-	printf( 
-		"%s%c-- %s", 
-		prefix, 
-		isLastEntry ? '\\' : '+', 
-		name
-	);
+	if( !justTheName )	{
+		printf( 
+			"%s%c-- %s", 
+			prefix, 
+			isLastEntry ? '\\' : '+', 
+			name
+		);
+	} else	{
+		printf( 
+			"%s", 
+			name
+		);
+	}
 	if( p_sw )	{
 		printf( "{%04o}", mode & ~S_IFMT );
 	}
@@ -216,7 +225,7 @@ processFile(
 	int		isLastEntry
 )
 {
-	printName( name, mode, isLastEntry );
+	printName( name, mode, isLastEntry, 0 );
 	if( w_sw && S_ISREG( mode ) )	{
 		FILE		*pipe;
 		char		buf[ BUFSIZ ];
@@ -307,7 +316,7 @@ processCurrentDirectory(
 			if( d_sw )	{
 				lastentry = ((--subdirs) <= 0) ? 1 : 0;
 			}
-			printName( d->d_name, stp[i].st_mode, lastentry );
+			printName( d->d_name, stp[i].st_mode, lastentry, 0 );
 			if( currentDepth < depth )	{
 				/* Push new directory state	 */
 				if( lastentry )	{
@@ -378,7 +387,7 @@ main(
 )
 {
 	int		c;		/* Command line character	 */
-	char		*path;		/* Path being processed		 */
+	char *		path;		/* Path being processed		 */
 
 	me = argv[0];
 	add_ignore( "." );
@@ -466,18 +475,52 @@ main(
 		}
 	}
 	if( optind < argc )	{
-		int	others = 0;
+		struct stat	st;
+		int		others = 0;
+
 		while( optind < argc )	{
 			if( others++ )	{
 				putchar( '\n' );
 			}
 			path = argv[ optind++ ];
-			printf( "%s%s\n", path, F_sw ? "/" : "" );
+			if( stat( path, &st ) )	{
+				fprintf(
+					stderr,
+					"%s: "
+					"cannot stat '%s'; "
+					"errno=%d (%s)"
+					".\n",
+					me,
+					path,
+					errno,
+					strerror( errno )
+				);
+				++nonfatal;
+				continue;
+			}
+			printName( path, st.st_mode, 0, 1 );
 			processDirectory( path, 1 );
 		}
 	} else	{
-		printf( "%s%s\n", ".", F_sw ? "/" : "" );
-		processCurrentDirectory( "." );
+		static char	here[] = ".";
+		struct stat	st;
+
+		if( stat( here, &st ) )	{
+			fprintf(
+				stderr,
+				"%s: "
+				"cannot stat '%s'; "
+				"errno=%d (%s)"
+				".\n",
+				me,
+				here,
+				errno,
+				strerror( errno )
+			);
+		} else	{
+			printName( here, st.st_mode, 0, 1 );
+			processCurrentDirectory( here );
+		}
 	}
 	return( nonfatal ? 1 : 0 );
 }
