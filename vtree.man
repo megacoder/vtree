@@ -24,6 +24,9 @@ vtree \- display visual filesystem tree
 .I \-f
 ]
 [
+.I \-g
+]
+[
 .I \-i
 .B subdir
 ]
@@ -32,14 +35,17 @@ vtree \- display visual filesystem tree
 .B levels
 ]
 [
-.I \-s
-]
-[
 .I \-o
 .B file
 ]
 [
 .I \-p
+]
+[
+.I \-s
+]
+[
+.I \-u
 ]
 [
 .I \-w
@@ -92,6 +98,8 @@ Only include directories in the report.
 .IP "\fI\-f\fP"
 fold uppercase characters into lowercase when sorting the directory
 contents.
+.IP "\fI\-g\fP"
+show gid of owner
 .IP "\fI\-i\fP subdir"
 Do not process (in any way) subdirectories with the name
 .BR subdir ;
@@ -112,6 +120,8 @@ instead of the standard output.
 Display the file permissions, enclosed in curly braces.
 .IP "\fI\-s\fP"
 Make the report shorter by squeezing out empty separator lines.
+.IP "\fI\-u\fP"
+show uid of owner
 .IP "\fI\-w\fP"
 execute the 
 .BR cvs( 1 )

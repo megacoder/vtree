@@ -25,6 +25,14 @@
 #include <ctype.h>
 #include <getopt.h>
 #include <errno.h>
+#include <grp.h>
+#include <pwd.h>
+
+typedef enum	{
+	Iwanna_perms	= (1 << 0),
+	Iwanna_user	= (1 << 1),
+	Iwanna_group	= (1 << 2)
+} Iwanna_t;
 
 #ifndef	WHATCOL
 #define WHATCOL	32
@@ -44,7 +52,7 @@ static char	prefix[ MAXPREFIX ];
 static int	a_sw = 0;
 static int	d_sw = 0;
 static int	f_sw = 0;
-static int	p_sw = 0;
+static int	combo_sw = 0;
 static int	s_sw = 0;
 static int	w_sw = 0;
 static int	F_sw = 0;
@@ -157,10 +165,49 @@ drop_leadin(
  *------------------------------------------------------------------------
  */
 
+static	char *
+getGroupName(
+	gid_t		gid
+)
+{
+	static	char	spelling[ BUFSIZ ];
+	char *		result;
+	struct group *	g;
+
+	g = getgrgid( gid );
+	if( g )	{
+		result = g->gr_name;
+	} else	{
+		snprintf( spelling, sizeof( spelling ), "%u", (unsigned) gid );
+		result = spelling;
+	}
+	return( result );
+
+}
+
+static	char *
+getUserName(
+	uid_t		uid
+)
+{
+	static	char	spelling[ BUFSIZ ];
+	char *		result;
+	struct passwd *	p;
+
+	p = getpwuid( uid );
+	if( p )	{
+		result = p->pw_name;
+	} else	{
+		snprintf( spelling, sizeof( spelling ), "%u", (unsigned) uid );
+		result = spelling;
+	}
+	return( result );
+}
+
 static void
 printName(
 	char		*name,
-	mode_t		mode,
+	struct stat *	st,
 	int		isLastEntry,
 	int		justTheName
 )
@@ -181,36 +228,53 @@ printName(
 			name
 		);
 	}
-	if( p_sw )	{
-		printf( "{%04o}", mode & ~S_IFMT );
+	if( combo_sw )	{
+		static char const	sep[] = ":";
+		char const *		s;
+
+		s = "";
+		printf( "[" );
+		if( combo_sw & Iwanna_perms )	{
+			printf( "%s%04o", s, st->st_mode & ~S_IFMT );
+			s = sep;
+		}
+		if( combo_sw & Iwanna_user )	{
+			printf( "%s%s", s, getUserName( st->st_uid ) );
+			s = sep;
+		}
+		if( combo_sw & Iwanna_group )	{
+			printf( "%s%s", s, getGroupName( st->st_gid ) );
+			s = sep;
+		}
+		printf( "]" );
 	}
 	if( F_sw )	{
-		if( S_ISREG( mode ) )	{
-			if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
+		if( S_ISREG( st->st_mode ) )	{
+			if( st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH ) ) {
 				tag = "*";
 			} else	{
 				tag = "";
 			}
-		} if( S_ISDIR( mode ) )	{
+		} if( S_ISDIR( st->st_mode ) )	{
 			tag = "/";
-		} else if( S_ISCHR( mode ) )	{
+		} else if( S_ISCHR( st->st_mode ) )	{
 			tag = "{c}";
-		} else if( S_ISBLK( mode ) )	{
+		} else if( S_ISBLK( st->st_mode ) )	{
 			tag = "{b}";
-		} else if( S_ISFIFO( mode ) )	{
+		} else if( S_ISFIFO( st->st_mode ) )	{
 			tag = "|";
-		} else if( S_ISSOCK( mode ) )	{
+		} else if( S_ISSOCK( st->st_mode ) )	{
 			tag = "%";
-		} else if( S_ISLNK( mode ) )	{
+		} else if( S_ISLNK( st->st_mode ) )	{
 			tag = "->";
-		} else if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
+		} else if( st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH ) ) {
 			tag = "*";
 		}
 		printf(
 			"%s", tag
 		);
 	}
-	if( S_ISDIR( mode ) )	{
+	if( S_ISDIR( st->st_mode ) )	{
 		printf( "\n" );
 	}
 }
@@ -218,12 +282,12 @@ printName(
 static void
 processFile(
 	char		*name,
-	mode_t		mode,
+	struct stat *	st,
 	int		isLastEntry
 )
 {
-	printName( name, mode, isLastEntry, 0 );
-	if( w_sw && S_ISREG( mode ) )	{
+	printName( name, st, isLastEntry, 0 );
+	if( w_sw && S_ISREG( st->st_mode ) )	{
 		FILE		*pipe;
 		char		buf[ BUFSIZ ];
 		char		*bp;
@@ -304,8 +368,10 @@ processCurrentDirectory(
 	}
 	/* Process each name in the directory in order	 */
 	for( i = 0; i < Nnames; ++i )	{
-		mode_t	mode = stp[i].st_mode;
-		int	isDir = S_ISDIR( mode );
+		struct stat * const	st = stp + i;
+		mode_t const		mode = st->st_mode;
+		int const		isDir = S_ISDIR( mode );
+
 		d = namelist[i];
 		/* Show only directories if -d switch	 */
 		lastentry = ( (i+1) == Nnames ) ? 1 : 0;
@@ -313,7 +379,7 @@ processCurrentDirectory(
 			if( d_sw )	{
 				lastentry = ((--subdirs) <= 0) ? 1 : 0;
 			}
-			printName( d->d_name, stp[i].st_mode, lastentry, 0 );
+			printName( d->d_name, st, lastentry, 0 );
 			if( currentDepth < depth )	{
 				/* Push new directory state	 */
 				if( lastentry )	{
@@ -328,7 +394,7 @@ processCurrentDirectory(
 			prefix[ Nprefix ] = '\0';
 			if( !lastentry && !s_sw ) printf( "%s|\n", prefix );
 		} else if( !d_sw )	{
-			processFile( d->d_name, mode, lastentry );
+			processFile( d->d_name, st, lastentry );
 			if( !lastentry && !s_sw ) printf( "%s|\n", prefix );
 		}
 	}
@@ -390,7 +456,7 @@ main(
 	add_ignore( "." );
 	add_ignore( ".." );
 	while( 
-		(c = getopt( argc, argv, "aDc:dFfl:i:n:so:pW:w" )) != EOF 
+		(c = getopt( argc, argv, "aDc:dFfgl:i:n:o:psuW:w" )) != EOF 
 	)	{
 		switch( c ) 	{
 		default:
@@ -417,6 +483,9 @@ main(
 		case 'f':
 			++f_sw;
 			break;
+		case 'g':
+			combo_sw |= Iwanna_group;
+			break;
 		case 'i':
 			add_ignore( optarg );
 			break;
@@ -424,13 +493,16 @@ main(
 			depth = atoi( optarg );
 			break;
 		case 'p':
-			++p_sw;
+			combo_sw |= Iwanna_perms;
 			break;
 		case 'o':
 			ofile = optarg;
 			break;
 		case 's':
 			++s_sw;
+			break;
+		case 'u':
+			combo_sw |= Iwanna_user;
 			break;
 		case 'W':
 			leadin = optarg; 
@@ -495,7 +567,7 @@ main(
 				++nonfatal;
 				continue;
 			}
-			printName( path, st.st_mode, 0, 1 );
+			printName( path, &st, 0, 1 );
 			processDirectory( path, 1 );
 		}
 	} else	{
@@ -515,7 +587,7 @@ main(
 				strerror( errno )
 			);
 		} else	{
-			printName( here, st.st_mode, 0, 1 );
+			printName( here, &st, 0, 1 );
 			processCurrentDirectory( here );
 		}
 	}
