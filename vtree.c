@@ -226,8 +226,10 @@ processFile(
 		/* Get the very first '^revision' out of the CVS log	 */
 		sprintf( 
 			buf, 
+			/* Get the log info				 */
 			"cvs log %s 2>/dev/null | "
-			"awk '/^revision/ { print $2; exit 0 }'"
+			/* Extract only the description info		 */
+			"sed -e '1,/^description:$/d' -e '/^--------/,$d'"
 			,
 			name 
 		);
