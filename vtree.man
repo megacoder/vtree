@@ -39,6 +39,9 @@ vtree \- display visual filesystem tree
 .B file
 ]
 [
+.I \-p
+]
+[
 .I \-w
 ]
 [
@@ -105,16 +108,18 @@ subdirectories.
 Write the report to
 .B file
 instead of the standard output.
+.IP "\fI\-p\fP"
+Display the file permissions, enclosed in curly braces.
 .IP "\fI\-s\fP"
 Make the report shorter by squeezing out empty separator lines.
 .IP "\fI\-w\fP"
 execute the 
-.BR sccs( 1 )
+.BR cvs( 1 )
 command
-.I prs
+.I log
 on the ordinary file to retrieve the module description information
 created by the 
-.B "sccs admin -fq'text'"
+.B "cvs admin -t-'text'"
 command.
 If the descriptive text exists, it is appended to the name of the
 ordinary file on the listing; if it does not exist (or if it has 0

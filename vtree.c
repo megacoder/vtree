@@ -1,4 +1,5 @@
 /*
+ * vim: ts=8 sw=8
  *------------------------------------------------------------------------
  *                       COPYRIGHT NOTICE
  *
@@ -42,6 +43,7 @@ static char	prefix[ MAXPREFIX ];
 static int	a_sw = 0;
 static int	d_sw = 0;
 static int	f_sw = 0;
+static int	p_sw = 0;
 static int	s_sw = 0;
 static int	w_sw = 0;
 static int	F_sw = 0;
@@ -188,8 +190,20 @@ printName(
 	} else if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
 		tag = "*";
 	}
-	printf( "%s%c-- %s%s", prefix, isLastEntry ? '\\' : '+', name, 
-		F_sw ? tag : "" );
+	printf( 
+		"%s%c-- %s", 
+		prefix, 
+		isLastEntry ? '\\' : '+', 
+		name
+	);
+	if( p_sw )	{
+		printf( "{%04o}", mode & ~S_IFMT );
+	}
+	if( F_sw )	{
+		printf(
+			"%s", tag
+		);
+	}
 	if( isDir )	{
 		printf( "\n" );
 	}
@@ -203,13 +217,20 @@ processFile(
 )
 {
 	printName( name, mode, isLastEntry );
-	if( w_sw )	{
+	if( w_sw && S_ISREG( mode ) )	{
 		FILE		*pipe;
 		char		buf[ BUFSIZ ];
 		char		*bp;
 		int		column;
 		column = Nprefix + 4 + strlen( name );
-		sprintf( buf, "sccs prs -r -d:Q: %s 2>/dev/null", name );
+		/* Get the very first '^revision' out of the CVS log	 */
+		sprintf( 
+			buf, 
+			"cvs log %s 2>/dev/null | "
+			"awk '/^revision/ { print $2; exit 0 }'"
+			,
+			name 
+		);
 		pipe = popen( buf, "r" );
 		if( pipe != (FILE *) NULL )	{
 			buf[0] = '\n';
@@ -361,7 +382,7 @@ main(
 	add_ignore( "." );
 	add_ignore( ".." );
 	while( 
-		(c = getopt( argc, argv, "aDc:dFfl:i:n:so:W:w" )) != EOF 
+		(c = getopt( argc, argv, "aDc:dFfl:i:n:so:pW:w" )) != EOF 
 	)	{
 		switch( c ) 	{
 		default:
@@ -394,6 +415,9 @@ main(
 		case 'l':
 			depth = atoi( optarg );
 			break;
+		case 'p':
+			++p_sw;
+			break;
 		case 'o':
 			ofile = optarg;
 			break;
@@ -412,7 +436,24 @@ main(
 	if( nonfatal )	{
 		fprintf( stderr, "%s: illegal switch(es)\n", me );
 		fprintf( stderr,
-	"usage: %s [-D] [-a] [-d] [-c] [-d depth] [-f] [-l limit] [-i subdir] [-s] [-o ofile] [-W prefix] [-w] [dir...]\n", me );
+			"usage: %s "
+			"[-D] "
+			"[-a] "
+			"[-d] "
+			"[-c] "
+			"[-d depth] "
+			"[-f] "
+			"[-l limit] "
+			"[-i subdir] "
+			"[-s] "
+			"[-o ofile] "
+			"[-p] "
+			"[-W prefix] "
+			"[-w] "
+			"[dir...]"
+			"\n", 
+			me 
+		);
 		exit( 1 );
 	}
 	if( ofile )	{
