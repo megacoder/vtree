@@ -166,32 +166,8 @@ printName(
 )
 {
 	char *		tag;
-	int		isDir;
 
 	tag = "???";
-	isDir = 0;
-	if( S_ISREG( mode ) )	{
-		if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
-			tag = "*";
-		} else	{
-			tag = "";
-		}
-	} if( S_ISDIR( mode ) )	{
-		tag = "/";
-		isDir = 1;
-	} else if( S_ISCHR( mode ) )	{
-		tag = "{c}";
-	} else if( S_ISBLK( mode ) )	{
-		tag = "{b}";
-	} else if( S_ISFIFO( mode ) )	{
-		tag = "|";
-	} else if( S_ISSOCK( mode ) )	{
-		tag = "%";
-	} else if( S_ISLNK( mode ) )	{
-		tag = "->";
-	} else if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
-		tag = "*";
-	}
 	if( !justTheName )	{
 		printf( 
 			"%s%c-- %s", 
@@ -209,11 +185,32 @@ printName(
 		printf( "{%04o}", mode & ~S_IFMT );
 	}
 	if( F_sw )	{
+		if( S_ISREG( mode ) )	{
+			if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
+				tag = "*";
+			} else	{
+				tag = "";
+			}
+		} if( S_ISDIR( mode ) )	{
+			tag = "/";
+		} else if( S_ISCHR( mode ) )	{
+			tag = "{c}";
+		} else if( S_ISBLK( mode ) )	{
+			tag = "{b}";
+		} else if( S_ISFIFO( mode ) )	{
+			tag = "|";
+		} else if( S_ISSOCK( mode ) )	{
+			tag = "%";
+		} else if( S_ISLNK( mode ) )	{
+			tag = "->";
+		} else if( mode & (S_IXUSR | S_IXGRP | S_IXOTH ) )	{
+			tag = "*";
+		}
 		printf(
 			"%s", tag
 		);
 	}
-	if( isDir )	{
+	if( S_ISDIR( mode ) )	{
 		printf( "\n" );
 	}
 }

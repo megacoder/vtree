@@ -61,4 +61,4 @@ uninstall-man::
 	${RM} ${MANDIR}/vtree.${MANEXT}
 
 check:: vtree
-	./vtree
+	./vtree ${ARGS}
