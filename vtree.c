@@ -571,9 +571,19 @@ main(
 			processDirectory( path, 1 );
 		}
 	} else	{
-		static char	here[] = ".";
+		char		here[ PATH_MAX + 1 ];
 		struct stat	st;
 
+		if( !getcwd( here, sizeof( here ) ) )	{
+			fprintf(
+				stderr,
+				"%s: getcwd() failed; errno=%d (%s).\n",
+				me,
+				errno,
+				strerror( errno )
+			);
+			exit( 1 );
+		}
 		if( stat( here, &st ) )	{
 			fprintf(
 				stderr,
