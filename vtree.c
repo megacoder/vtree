@@ -266,13 +266,14 @@ printName(
 				}
 			}
 			if( d->name )	{
-				double	s;
-				s = (double) st->st_size /
+				double	a;
+				a = (double) st->st_size /
 					(double) d->divisor;
-				printf( "%.0f%s", s, d->name );
+				printf( "%s%.0f%s", s, a, d->name );
 			} else	{
 				printf( 
-					"%llu", 
+					"%s%llu", 
+					s,
 					(unsigned long long ) st->st_size
 				);
 			}
