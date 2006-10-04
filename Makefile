@@ -20,7 +20,7 @@ TARGETS	=all clean distclean clobber tags install install-bin install-man \
 CC	=ccache gcc -march=i686
 DEFS	=-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 OPT	=-Os
-CFLAGS	=-pipe ${OPT} -Wall -Werror -pedantic -g ${DEFS}
+CFLAGS	=-pipe ${OPT} -Wall -Werror -g ${DEFS}
 HFILES  =
 CFILES  =vtree.c 
 OBS	=${CFILES:.c=.o}

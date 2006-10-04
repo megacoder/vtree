@@ -27,6 +27,9 @@ vtree \- display visual filesystem tree
 .I \-g
 ]
 [
+.I \-h
+]
+[
 .I \-i
 .B subdir
 ]
@@ -100,6 +103,8 @@ fold uppercase characters into lowercase when sorting the directory
 contents.
 .IP "\fI\-g\fP"
 show gid of owner
+.IP "\fI\-h\fP"
+show approximate file sizes in human-readable form
 .IP "\fI\-i\fP subdir"
 Do not process (in any way) subdirectories with the name
 .BR subdir ;

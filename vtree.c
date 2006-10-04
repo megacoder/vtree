@@ -31,7 +31,8 @@
 typedef enum	{
 	Iwanna_perms	= (1 << 0),
 	Iwanna_user	= (1 << 1),
-	Iwanna_group	= (1 << 2)
+	Iwanna_group	= (1 << 2),
+	Iwanna_size	= (1 << 3)
 } Iwanna_t;
 
 #ifndef	WHATCOL
@@ -246,6 +247,37 @@ printName(
 			printf( "%s%s", s, getGroupName( st->st_gid ) );
 			s = sep;
 		}
+		if( combo_sw & Iwanna_size )	{
+			typedef struct	{
+				char * const	name;
+				off_t const	divisor;
+			} Divisors_t;
+			static Divisors_t const	divs[] =	{
+				{	"G",	1024UL * 1024UL * 1024UL },
+				{	"M",	1024UL * 1024UL		 },
+				{	"K",	1024UL			 },
+				{ NULL }
+			};
+			Divisors_t const *	d;
+
+			for( d = divs; d->name; ++d )	{
+				if( st->st_size >= d->divisor )	{
+					break;
+				}
+			}
+			if( d->name )	{
+				double	s;
+				s = (double) st->st_size /
+					(double) d->divisor;
+				printf( "%.0f%s", s, d->name );
+			} else	{
+				printf( 
+					"%llu", 
+					(unsigned long long ) st->st_size
+				);
+			}
+			s = sep;
+		}
 		printf( "]" );
 	}
 	if( F_sw )	{
@@ -456,7 +488,7 @@ main(
 	add_ignore( "." );
 	add_ignore( ".." );
 	while( 
-		(c = getopt( argc, argv, "aDc:dFfgl:i:n:o:psuW:w" )) != EOF 
+		(c = getopt( argc, argv, "aDc:dhFfgl:i:n:o:psuW:w" )) != EOF 
 	)	{
 		switch( c ) 	{
 		default:
@@ -485,6 +517,9 @@ main(
 			break;
 		case 'g':
 			combo_sw |= Iwanna_group;
+			break;
+		case 'h':
+			combo_sw |= Iwanna_size;
 			break;
 		case 'i':
 			add_ignore( optarg );
