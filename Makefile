@@ -24,7 +24,8 @@ CFLAGS	=-pipe ${OPT} -Wall -Werror -g ${DEFS}
 HFILES  =
 CFILES  =vtree.c 
 OBS	=${CFILES:.c=.o}
-PREFIX	=${HOME}/opt/$(shell uname -m)
+
+PREFIX	=/opt
 BINDIR	=${PREFIX}/bin
 MANEXT	=1
 MANDIR	=${PREFIX}/man/man${MANEXT}
