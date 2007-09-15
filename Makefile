@@ -17,7 +17,9 @@ TARGETS	=all clean distclean clobber tags install install-bin install-man \
 .PHONY: ${TARGETS}
 
 #
-CC	=ccache gcc -march=i686
+CCMODE	=32
+#CCMODE	=64
+CC	=gcc -m${CCMODE}
 DEFS	=-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 OPT	=-Os
 CFLAGS	=-pipe ${OPT} -Wall -Werror -g ${DEFS}
