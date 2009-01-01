@@ -18,7 +18,7 @@ TARGETS	=all clean distclean clobber tags install install-bin install-man \
 
 #
 CCMODE	=32
-#CCMODE	=64
+CCMODE	=64
 CC	=gcc -m${CCMODE}
 DEFS	=-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 OPT	=-Os
@@ -48,8 +48,7 @@ tags::	${HFILES} ${CFILES}
 install:: install-bin install-man
 
 install-bin:: vtree
-	install -d ${BINDIR}
-	install -c -m 755 -s vtree ${BINDIR}/vtree
+	install -D -m 755 -s vtree ${BINDIR}/vtree
 
 install-man:: vtree.man
 	install -d ${MANDIR}
