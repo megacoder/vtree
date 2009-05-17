@@ -382,7 +382,7 @@ processCurrentDirectory(
 	/* Stat the directory and count subdirectories	 */
 	for( subdirs = i = 0; i < Nnames; ++i )	{
 		d = namelist[ i ];
-		if( stat( d->d_name, stp + i ) < 0 )	{
+		if( lstat( d->d_name, stp + i ) < 0 )	{
 			fprintf( stderr,
 				"%s: cannot stat '%s'\n", me,
 				d->d_name );
