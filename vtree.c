@@ -124,13 +124,10 @@ permit(
 
 static int
 Falphasort(
-	const void *		larg,
-	const void *		rarg
+	const struct dirent * * const	l,
+	const struct dirent * * const	r
 )
 {
-	const struct dirent * const * const	l = larg;
-	const struct dirent * const * const	r = rarg;
-
 	return strcasecmp( (*l)->d_name, (*r)->d_name );
 }
 
@@ -217,15 +214,15 @@ printName(
 
 	tag = "???";
 	if( !justTheName )	{
-		printf( 
-			"%s%c-- %s", 
-			prefix, 
-			isLastEntry ? '\\' : '+', 
+		printf(
+			"%s%c-- %s",
+			prefix,
+			isLastEntry ? '\\' : '+',
 			name
 		);
 	} else	{
-		printf( 
-			"%s", 
+		printf(
+			"%s",
 			name
 		);
 	}
@@ -271,8 +268,8 @@ printName(
 					(double) d->divisor;
 				printf( "%s%.0f%s", s, a, d->name );
 			} else	{
-				printf( 
-					"%s%llu", 
+				printf(
+					"%s%llu",
 					s,
 					(unsigned long long ) st->st_size
 				);
@@ -327,14 +324,14 @@ processFile(
 		int		column;
 		column = Nprefix + 4 + strlen( name );
 		/* Get the very first '^revision' out of the CVS log	 */
-		sprintf( 
-			buf, 
+		sprintf(
+			buf,
 			/* Get the log info				 */
 			"cvs log %s 2>/dev/null | "
 			/* Extract only the description info		 */
 			"sed -e '1,/^description:$/d' -e '/^--------/,$d'"
 			,
-			name 
+			name
 		);
 		pipe = popen( buf, "r" );
 		if( pipe != (FILE *) NULL )	{
@@ -363,7 +360,7 @@ processCurrentDirectory(
 )
 {
 	int		subdirs;
-	struct stat 	*stp;
+	struct stat	*stp;
 	struct direct	*d;
 	struct direct	**namelist = (struct direct **) NULL;
 	int		Nnames;
@@ -488,8 +485,8 @@ main(
 	me = argv[0];
 	add_ignore( "." );
 	add_ignore( ".." );
-	while( 
-		(c = getopt( argc, argv, "aDc:dhFfgl:i:n:o:psuW:w" )) != EOF 
+	while(
+		(c = getopt( argc, argv, "aDc:dhFfgl:i:n:o:psuW:w" )) != EOF
 	)	{
 		switch( c ) 	{
 		default:
@@ -541,7 +538,7 @@ main(
 			combo_sw |= Iwanna_user;
 			break;
 		case 'W':
-			leadin = optarg; 
+			leadin = optarg;
 			Nleadin = strlen( leadin );
 			break;
 		case 'w':
@@ -567,8 +564,8 @@ main(
 			"[-W prefix] "
 			"[-w] "
 			"[dir...]"
-			"\n", 
-			me 
+			"\n",
+			me
 		);
 		exit( 1 );
 	}
