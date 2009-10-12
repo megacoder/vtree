@@ -69,6 +69,80 @@ static int	currentDepth;		/* How deep is our love?	 */
 
 /*
  *------------------------------------------------------------------------
+ * xstrdup: allocate duplicate string or die trying.
+ *------------------------------------------------------------------------
+ */
+
+static	char *
+xstrdup(
+	char const * const	s
+)
+{
+	char * const		v = strdup( s );
+
+	if( !v )	{
+		fprintf(
+			stderr,
+			"%s: out of strdup memory.\n",
+			me
+		);
+		exit( 1 );
+	}
+	return( v );
+}
+
+/*
+ *------------------------------------------------------------------------
+ * xmalloc: allocate space or die trying.
+ *------------------------------------------------------------------------
+ */
+
+static	void *
+xmalloc(
+	size_t const	qty
+)
+{
+	void *		ptr = malloc( qty );
+
+	if( !ptr )	{
+		fprintf(
+			stderr,
+			"%s: out of memory.\n",
+			me
+		);
+		exit( 1 );
+		/*NOTREACHED*/
+	}
+	return( ptr );
+}
+
+/*
+ *------------------------------------------------------------------------
+ * xrealloc: reallocate storage or die trying
+ *------------------------------------------------------------------------
+ */
+
+static	void *
+xrealloc(
+	void * const	loc,
+	size_t const	newSize
+)
+{
+	void * const	ptr = realloc( loc, newSize );
+
+	if( !ptr )	{
+		fprintf(
+			stderr,
+			"%s: out of realloc memory.\n",
+			me
+		);
+		exit( 1 );
+	}
+	return( ptr );
+}
+
+/*
+ *------------------------------------------------------------------------
  * add_ignore: add directory name to list of directories we'll ignore
  *------------------------------------------------------------------------
  */
@@ -80,19 +154,13 @@ add_ignore(
 {
 	if( ignore_used >= Nignores )	{
 		int		size;
+
 		Nignores += 128;
-		size = Nignores * sizeof( char *);
-		if( ignores ) ignores = (char **) realloc( ignores, size );
-		else	ignores = (char **) malloc( size );
-		if( !ignores )	{
-OutOfMemory:
-			fprintf( stderr, "%s: out of memory\n", me );
-			exit( 1 );
-			/*NOTREACHED*/
-		}
+		size = Nignores * sizeof( *ignores );
+		ignores = ignores ?
+			xrealloc( ignores, size ) : xmalloc( size );
 	}
-	if( (ignores[ ignore_used++ ] = strdup( name )) == (char *) NULL )
-		goto OutOfMemory;
+	ignores[ ignore_used++ ] = xstrdup( name );
 }
 
 /*
@@ -359,78 +427,99 @@ processCurrentDirectory(
 	char		*path
 )
 {
-	int		subdirs;
-	struct stat	*stp;
 	struct direct	*d;
-	struct direct	**namelist = (struct direct **) NULL;
-	int		Nnames;
-	int		i;
 	int		lastentry;
 
 	++currentDepth;
-	Nnames = scandir( ".", &namelist, permit,
-		(f_sw ? Falphasort : alphasort) );
-	stp = (struct stat *) calloc( Nnames, sizeof( struct stat ) );
-	if( stp == (struct stat *) NULL )	{
-		fprintf( stderr,
-		"%s: cannot allocate stat buf array\n", me );
-		exit( 1 );
-	}
-	/* Stat the directory and count subdirectories	 */
-	for( subdirs = i = 0; i < Nnames; ++i )	{
-		d = namelist[ i ];
-		if( lstat( d->d_name, stp + i ) < 0 )	{
-			fprintf( stderr,
-				"%s: cannot stat '%s'\n", me,
-				d->d_name );
-			++nonfatal;
-			stp[i].st_mode = 0;
-		}
-		if( S_ISDIR( stp[i].st_mode ) ) ++subdirs;
-	}
-	/* Print current directory name and optional trailer line	 */
-	if( d_sw )	{
-		if( subdirs && !s_sw )	{
-			printf( "%s|\n", prefix );
-		}
-	} else if( Nnames && !s_sw )	{
-		printf( "%s|\n", prefix );
-	}
-	/* Process each name in the directory in order	 */
-	for( i = 0; i < Nnames; ++i )	{
-		struct stat * const	st = stp + i;
-		mode_t const		mode = st->st_mode;
-		int const		isDir = S_ISDIR( mode );
+	do	{
+		int		Nnames;
+		struct direct	**namelist;
+		struct stat	*stp;
 
-		d = namelist[i];
-		/* Show only directories if -d switch	 */
-		lastentry = ( (i+1) == Nnames ) ? 1 : 0;
-		if( isDir )	{
-			if( d_sw )	{
-				lastentry = ((--subdirs) <= 0) ? 1 : 0;
-			}
-			printName( d->d_name, st, lastentry, 0 );
-			if( currentDepth < depth )	{
-				/* Push new directory state	 */
-				if( lastentry )	{
-					strcpy( prefix + Nprefix, "    " );
-				} else	{
-					strcpy( prefix + Nprefix, "|   " );
-				}
-				Nprefix += 4;
-				processDirectory( d->d_name, lastentry );
-				Nprefix -= 4;
-			}
-			prefix[ Nprefix ] = '\0';
-			if( !lastentry && !s_sw ) printf( "%s|\n", prefix );
-		} else if( !d_sw )	{
-			processFile( d->d_name, st, lastentry );
-			if( !lastentry && !s_sw ) printf( "%s|\n", prefix );
+		/* Get basenames from this directory, if we can		 */
+		Nnames = scandir( ".", &namelist, permit,
+			(f_sw ? Falphasort : alphasort) );
+		if( Nnames <= 0 )	{
+#if	0
+			fprintf(
+				stderr,
+				"%s: cannot scan '%s'.\n",
+				me,
+				path
+			);
+#endif	/* NOPE */
+			++nonfatal;
+			break;
 		}
-	}
+		stp = xmalloc( Nnames * sizeof( *stp ) );
+		do	{
+			int		subdirs;
+			int		i;
+
+			/* Stat the directory and count subdirectories	 */
+			for( subdirs = i = 0; i < Nnames; ++i )	{
+				d = namelist[ i ];
+				if( lstat( d->d_name, stp + i ) < 0 )	{
+					fprintf( stderr,
+						"%s: cannot stat '%s'\n", me,
+						d->d_name );
+					++nonfatal;
+					stp[i].st_mode = 0;
+				}
+				if( S_ISDIR( stp[i].st_mode ) )	{
+					++subdirs;
+				}
+			}
+			/* Say current directory and opt trailer line	 */
+			if( d_sw )	{
+				if( subdirs && !s_sw )	{
+					printf( "%s|\n", prefix );
+				}
+			} else if( Nnames && !s_sw )	{
+				printf( "%s|\n", prefix );
+			}
+			/* Process each name in the directory in order	 */
+			for( i = 0; i < Nnames; ++i )	{
+				struct stat * const	st = stp + i;
+				mode_t const		mode = st->st_mode;
+				int const		isDir = S_ISDIR( mode );
+
+				d = namelist[i];
+				/* Show only directories if -d switch	 */
+				lastentry = ( (i+1) == Nnames ) ? 1 : 0;
+				if( isDir )	{
+					if( d_sw )	{
+						lastentry = ((--subdirs) <= 0) ? 1 : 0;
+					}
+					printName( d->d_name, st, lastentry, 0 );
+					if( currentDepth < depth )	{
+						/* Push new directory state */
+						if( lastentry )	{
+							strcpy( prefix + Nprefix, "    " );
+						} else	{
+							strcpy( prefix + Nprefix, "|   " );
+						}
+						Nprefix += 4;
+						processDirectory( d->d_name, lastentry );
+						Nprefix -= 4;
+					}
+					prefix[ Nprefix ] = '\0';
+					if( !lastentry && !s_sw )	{
+						printf( "%s|\n", prefix );
+					}
+				} else if( !d_sw )	{
+					processFile( d->d_name, st, lastentry );
+					if( !lastentry && !s_sw )	{
+						printf( "%s|\n", prefix );
+					}
+				}
+			}
+		} while( 0 );
+		free( stp );
+		/* Don't need namelist any longer			 */
+		free( namelist );
+	} while( 0 );
 	--currentDepth;
-	free( (char *) stp );
-	free( (char *) namelist );
 	return( 0 );
 }
 
@@ -443,7 +532,7 @@ processDirectory(
 	char		here[ MAXPATHLEN ];
 	int		status;
 
-	if( getcwd( here, MAXPATHLEN ) == (char *) NULL )	{
+	if( getcwd( here, MAXPATHLEN ) == NULL )	{
 		fprintf( stderr,
 			"%s cannot determine current directory.\n",
 			me
@@ -488,7 +577,7 @@ main(
 	while(
 		(c = getopt( argc, argv, "aDc:dhFfgl:i:n:o:psuW:w" )) != EOF
 	)	{
-		switch( c ) 	{
+		switch( c )	{
 		default:
 			fprintf( stderr, "%s: no -%c yet!\n", me, c );
 			/*FALLTHRU*/
@@ -576,6 +665,7 @@ main(
 			exit( 1 );
 		}
 	}
+	/* Take path list from command if anything left on it		 */
 	if( optind < argc )	{
 		struct stat	st;
 		int		others = 0;
@@ -604,6 +694,8 @@ main(
 			processDirectory( path, 1 );
 		}
 	} else	{
+		/* Default to current directory				 */
+
 		char		here[ PATH_MAX + 1 ];
 		struct stat	st;
 
