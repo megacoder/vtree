@@ -1,14 +1,20 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+VERSION=[1.0.0]
+OWNER=[Tommy.Reynolds@MegaCoder.com]
+
 AC_PREREQ([2.66])
-AC_INIT([vtree], [1.0.0], [Tommy.Reynolds@MegaCoder.com])
+AC_INIT([vtree], VERSION, OWNER)
 AC_CONFIG_SRCDIR([src/vtree.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Setup other autotools
 
 AM_INIT_AUTOMAKE
+
+AC_SUBST(VERSION)
+AC_SUBST(OWNER)
 
 # Checks for programs.
 AC_PROG_CC
