@@ -1,2 +1,1 @@
-man1_MANS       = vtree.1
-EXTRA_DIST      = vtree.1
+dist_man1_MANS       = vtree.1
