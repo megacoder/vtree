@@ -1,0 +1,43 @@
+# Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
+Summary: vtree.git
+# The Summary: line should be expanded to about here -----^
+Name: vtree.git
+Version: unknown
+Release: 1
+#Group: unknown
+#License: unknown
+Source: vtree.git.tar.gz
+#BuildRoot: %{_tmppath}/%{name}-root
+# Following are optional fields
+#URL: http://www.example.net/vtree.git/
+#Distribution: Red Hat Contrib-Net
+#Patch: vtree.git-%{version}.patch
+#Prefix: /
+#BuildArch: noarch
+#Requires: 
+#Obsoletes: 
+#BuildRequires: 
+
+%description
+vtree.git version unknown
+
+%prep
+%setup -n 'vtree.git'
+#%patch
+
+%build
+%configure
+make
+
+%install
+%makeinstall
+
+#%clean
+#[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
+
+%files
+%defattr(-,root,root)
+
+%changelog
+* Thu Nov 17 2011 Tommy Reynolds <reynolds@quadimodo.darkzone.un>
+- Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
