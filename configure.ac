@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.66])
 AC_INIT([vtree], [1.0.0], [Tommy.Reynolds@MegaCoder.com])
-AC_CONFIG_SRCDIR([vtree.c])
+AC_CONFIG_SRCDIR([src/vtree.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Setup other autotools
@@ -33,5 +33,6 @@ AC_CHECK_FUNCS([getcwd strcasecmp strchr strdup strerror])
 
 AC_CONFIG_FILES([
         Makefile
+        src/Makefile
 ])
 AC_OUTPUT
