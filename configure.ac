@@ -34,5 +34,6 @@ AC_CHECK_FUNCS([getcwd strcasecmp strchr strdup strerror])
 AC_CONFIG_FILES([
         Makefile
         src/Makefile
+        man/Makefile
 ])
 AC_OUTPUT
