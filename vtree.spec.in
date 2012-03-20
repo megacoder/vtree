@@ -35,6 +35,7 @@ I wrote vtree(1) long before tree(1) was in any distro.
 %defattr(-,root,root)
 %doc AUTHORS COPYING README INSTALL NEWS LICENSE TODO
 %{_bindir}/%{name}
+%{_mandir}/man1/%{name}.*
 
 %changelog
 * Tue May 16 2009 Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
