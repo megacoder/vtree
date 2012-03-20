@@ -1,39 +1,28 @@
-# Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
-Summary: vtree.git
-# The Summary: line should be expanded to about here -----^
+Summary: Graphically show directory tree.
+Prefix: /usr
 Name: vtree.git
-Version: unknown
+Version: @VERSION@
 Release: 1
 #Group: unknown
-#License: unknown
-Source: vtree.git.tar.gz
-#BuildRoot: %{_tmppath}/%{name}-root
-# Following are optional fields
-#URL: http://www.example.net/vtree.git/
-#Distribution: Red Hat Contrib-Net
-#Patch: vtree.git-%{version}.patch
-#Prefix: /
-#BuildArch: noarch
-#Requires: 
-#Obsoletes: 
-#BuildRequires: 
+License: GPLv2
+Source: vtree.%{VERSION}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}
 
 %description
-vtree.git version unknown
+My version of tree(1), before tree(1) was in the distro.
 
 %prep
-%setup -n 'vtree.git'
-#%patch
+%setup
 
 %build
 %configure
-make
+        make
 
 %install
-%makeinstall
+        %makeinstall
 
 #%clean
-#[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
+        [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
 
 %files
 %defattr(-,root,root)
