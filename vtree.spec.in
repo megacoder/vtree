@@ -1,32 +1,41 @@
-Summary: Graphically show directory tree.
-Prefix: /usr
-Name: vtree.git
-Version: @VERSION@
-Release: 1
-#Group: unknown
+%define ver @VERSION@
+%define rel 1
+%define prefix /usr
+
+Prefix: %{prefix}
+
+Summary: Convert vtree or h_vtree codes to names and vice versa
+Name: vtree
+Version: %{ver}
+Release: %{rel}
+Source: http://ftp.megacoder.com/vtree/%{name}-%{ver}.tar.gz
 License: GPLv2
-Source: vtree.%{VERSION}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}
+URL: http://www.megacoder.com/
+Group: Applications/System
+Buildroot: %{_tmppath}/%{name}-root
 
 %description
-My version of tree(1), before tree(1) was in the distro.
+I wrote tree(1) before tree(1) was in any distro.
 
 %prep
-%setup
 
+%setup -q
 %build
-%configure
-        make
+	CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix}
+	make
 
 %install
-        %makeinstall
+	rm -rf ${RPM_BUILD_ROOT}
+	make prefix=${RPM_BUILD_ROOT}%{prefix} install
 
-#%clean
-        [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
+%clean
+	rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
+%doc AUTHORS COPYING README INSTALL NEWS LICENSE TODO
+%{_bindir}/%{name}
 
 %changelog
-* Thu Nov 17 2011 Tommy Reynolds <reynolds@quadimodo.darkzone.un>
-- Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
+* Tue May 16 2009 Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
+- Booger
