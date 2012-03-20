@@ -5,8 +5,8 @@ Version: @VERSION@
 Release: 1
 #Group: unknown
 License: GPLv2
-Source: vtree.%{VERSION}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}
+Source: vtree.%{version}-%{release}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
 
 %description
 My version of tree(1), before tree(1) was in the distro.
@@ -19,13 +19,15 @@ My version of tree(1), before tree(1) was in the distro.
         make
 
 %install
-        %makeinstall
+%makeinstall
 
-#%clean
+%clean
         [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
 
 %files
 %defattr(-,root,root)
+%{_bindir}/vtree
+%{_mandir}/man1/vtree.1*
 
 %changelog
 * Thu Nov 17 2011 Tommy Reynolds <reynolds@quadimodo.darkzone.un>
