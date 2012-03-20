@@ -5,21 +5,23 @@ Version: @VERSION@
 Release: 1
 #Group: unknown
 License: GPLv2
-Source: vtree.%{version}-%{release}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
+Source: vtree-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}
 
 %description
 My version of tree(1), before tree(1) was in the distro.
 
 %prep
-%setup
+%setup -q
 
 %build
-%configure
+        ./autogen.sh
+        CFLAGS="${RPM_OPT_FLAGS}" ./configure --prefix=%{prefix}
         make
 
 %install
-%makeinstall
+        rm -rf ${RPM_BUILD_ROOT}
+        make prefix=${RPM_BUILD_ROOT}%{prefix} install
 
 %clean
         [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
