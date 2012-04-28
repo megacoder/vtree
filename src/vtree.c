@@ -364,7 +364,16 @@ printName(
 		} else if( S_ISSOCK( st->st_mode ) )	{
 			tag = "%";
 		} else if( S_ISLNK( st->st_mode ) )	{
-			tag = "->";
+			static char	target[ PATH_MAX + 1 + 4 ];
+			ssize_t		len;
+			strcpy( target, " -> " );
+			len = readlink( name, target + 4, PATH_MAX );
+			if( len < 0 )	{
+				tag = "->";
+			} else	{
+				target[ 4 + len ] = '\0';
+				tag = target;
+			}
 		} else if( st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH ) ) {
 			tag = "*";
 		}
