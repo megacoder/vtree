@@ -13,6 +13,7 @@ License: GPLv2
 URL: http://www.megacoder.com/
 Group: Applications/System
 Buildroot: %{_tmppath}/%{name}-root
+BuildRequires: python-markdown2 lynx
 
 %description
 I wrote vtree(1) long before tree(1) was in any distro.
