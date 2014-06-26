@@ -1,5 +1,18 @@
 2014-06-26  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
 
+	* bootstrap.sh: Drop cruft.
+
+2014-06-26  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
+
+	* ChangeLog, INSTALL, configure.ac: Can use an earlier version of
+	autoconf for this.  Added script to build RPM locally.
+
+2014-06-26  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
+
+	* Changelog: Dropped phantom file.
+
+2014-06-26  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
+
 	* bootstrap.sh: All-in-one build script.
 
 2014-05-24  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
