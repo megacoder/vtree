@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.66])
-AC_INIT([vtree], [1.0.1], [Tommy.Reynolds@MegaCoder.com])
+AC_PREREQ([2.59])
+AC_INIT([vtree], [1.0.2], [Tommy.Reynolds@MegaCoder.com])
 AC_CONFIG_SRCDIR([src/vtree.c])
 AC_CONFIG_HEADERS([config.h])
 
