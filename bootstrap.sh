@@ -1,4 +1,5 @@
 #!/bin/sh
+rm -f configure
 autoreconf -fvim
 ./configure
 make dist
