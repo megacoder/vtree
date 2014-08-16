@@ -1,5 +1,9 @@
 2014-06-26  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
 
+	* ChangeLog: Record cruft dropping.
+
+2014-06-26  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
+
 	* bootstrap.sh: Drop cruft.
 
 2014-06-26  Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
