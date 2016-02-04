@@ -13,7 +13,6 @@ License: GPLv2
 URL: http://www.megacoder.com/
 Group: Applications/System
 Buildroot: %{_tmppath}/%{name}-root
-BuildRequires: python-markdown lynx
 
 %description
 I wrote vtree(1) long before tree(1) was in any distro.
@@ -34,7 +33,7 @@ I wrote vtree(1) long before tree(1) was in any distro.
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS COPYING README INSTALL NEWS LICENSE TODO
+%doc AUTHORS COPYING README.md INSTALL NEWS LICENSE TODO
 %{_bindir}/%{name}
 %{_mandir}/man1/%{name}.*
 
