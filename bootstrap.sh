@@ -1,6 +1,7 @@
-#!/bin/sh
-rm -f configure
-autoreconf -fvim
+#!/bin/zsh
+aclocal
+autoconf
+automake --foreign --add-missing --copy --force-missing
 ./configure
 make dist
 rm -rf RPM
